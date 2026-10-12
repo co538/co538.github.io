@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方益凡 · 小王子的星球竞选之旅</title>
+<style>
+  :root{--night:#1a2847;--night-deep:#0f1d3a;--night-light:#2c4373;--star:#ffd96b;--star-bright:#ffe88a;--rose:#e87461;--rose-light:#f4a896;--cream:#fef9e7;--cream-alt:#f5edd0;--planet:#d4a574;--planet-dark:#b8865a;--text:#2c3e50;--text-muted:#5a6c7d;--card:#fffdf5;--shadow:0 8px 32px rgba(26,40,71,.12);--fox:#e8945a;--green:#6b8e4e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;background:var(--cream);color:var(--text);line-height:1.8}
+  .starfield{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,var(--night-deep) 0%,var(--night) 40%,var(--night-light) 100%)}
+  .star{position:absolute;background:var(--star);border-radius:50%;box-shadow:0 0 6px var(--star-bright);animation:twinkle 3s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+  .book{position:relative;width:100vw;height:100vh;z-index:2}
+  .page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 30px 70px;opacity:0;pointer-events:none;transition:opacity .6s ease,transform .6s ease;transform:translateX(60px);overflow:hidden}
+  .page.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+  .page.prev{transform:translateX(-60px)}
+  .page-tag{position:absolute;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.4);font-size:12px;letter-spacing:3px;z-index:5;white-space:nowrap}
+  .page-tag .num{color:var(--star-bright)}
+  .page.dark{color:#fff}
+  .page.dark .section-title{color:#fff}
+  .page.dark .section-desc{color:rgba(255,255,255,.6)}
+  .page.light{background:linear-gradient(180deg,var(--cream) 0%,var(--cream-alt) 100%)}
+  .page.light .section-title{color:var(--night)}
+  .page.light .section-desc{color:var(--text-muted)}
+  .page.light .card-bg{background:var(--card);box-shadow:var(--shadow);border:1px solid rgba(255,217,107,.15)}
+  .page.dark .card-bg{background:rgba(255,255,255,.08);border:1px solid rgba(255,217,107,.2)}
+  .section-icon-wrap{width:56px;height:56px;margin:0 auto 14px}.section-icon-wrap svg{width:100%;height:100%}
+  .section-stars{text-align:center;color:var(--star);font-size:12px;letter-spacing:6px;margin-bottom:10px}
+  .section-title{font-size:30px;font-weight:700;margin-bottom:8px;letter-spacing:2px;text-align:center}
+  .section-desc{font-size:13px;font-style:italic;text-align:center;margin-bottom:24px;position:relative;padding:0 24px;display:inline-block}
+  .section-desc::before,.section-desc::after{content:"";position:absolute;top:50%;width:16px;height:1px;background:var(--star)}.section-desc::before{left:0}.section-desc::after{right:0}
+  .highlight{color:var(--rose);font-weight:600}.page.dark .highlight{color:var(--star-bright)}
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);z-index:50;width:48px;height:48px;border-radius:50%;background:rgba(255,217,107,.15);border:1px solid rgba(255,217,107,.35);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;color:var(--star-bright)}
+  .nav-btn:hover{background:rgba(255,217,107,.3);transform:translateY(-50%) scale(1.1)}.nav-btn:disabled{opacity:.2;cursor:default}
+  .nav-prev{left:24px}.nav-next{right:24px}.nav-btn svg{width:20px;height:20px}
+  .pager{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:10px}
+  .pager-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,217,107,.25);cursor:pointer;transition:all .3s}
+  .pager-dot.active{background:var(--star);width:24px;border-radius:4px}
+  .pager-label{color:rgba(255,255,255,.4);font-size:12px;margin:0 8px;white-space:nowrap}.pager-label .cur{color:var(--star-bright)}
+  .page-content{width:100%;max-width:760px}
+  .cover{text-align:center}
+  .cover .prince-planet{width:170px;height:170px;margin:0 auto 18px;animation:float 6s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .cover-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,217,107,.12);border:1px solid rgba(255,217,107,.35);color:var(--star-bright);padding:6px 22px;border-radius:25px;font-size:12px;letter-spacing:2px;margin-bottom:18px}
+  .cover h1{font-size:44px;font-weight:700;margin-bottom:10px;letter-spacing:3px;text-shadow:0 2px 20px rgba(255,217,107,.3)}.cover h1 .name{color:var(--star-bright)}
+  .cover-quote{color:rgba(255,255,255,.65);font-size:15px;font-style:italic;margin-bottom:6px}
+  .cover-role{color:var(--star-bright);font-size:19px;font-weight:600;margin:16px 0 22px}
+  .cover-meta{display:flex;justify-content:center;gap:28px;flex-wrap:wrap}
+  .cover-meta-item{text-align:center;border-left:1px solid rgba(255,217,107,.3);padding-left:28px}.cover-meta-item:first-child{border-left:none;padding-left:0}
+  .cover-meta-item span{font-size:12px;color:rgba(255,255,255,.5)}.cover-meta-item strong{display:block;color:#fff;font-size:16px;margin-top:3px}
+  .cover-hint{margin-top:24px;color:rgba(255,217,107,.5);font-size:12px;letter-spacing:1px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  .photo-circle{border-radius:50%;padding:4px;background:linear-gradient(135deg,var(--star),var(--rose));box-shadow:0 0 24px rgba(255,217,107,.2)}.photo-circle img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+  .card-bg{border-radius:18px;padding:30px 26px}
+  .info-grid{display:grid;grid-template-columns:180px 1fr;gap:28px;align-items:center}
+  @media(max-width:680px){.info-grid{grid-template-columns:1fr;text-align:center}}
+  .avatar-card{text-align:center}.avatar-card .photo-wrap{width:130px;height:130px;margin:0 auto 12px}
+  .avatar-card h3{font-size:22px;margin-bottom:2px}.avatar-card .role{font-size:12px}
+  .page.dark .avatar-card h3{color:#fff}.page.dark .avatar-card .role{color:var(--star-bright)}
+  .page.light .avatar-card h3{color:var(--night)}.page.light .avatar-card .role{color:var(--rose)}
+  .info-list{text-align:left}
+  .info-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px dashed rgba(255,217,107,.15)}.info-row:last-child{border-bottom:none}
+  .page.dark .info-row span:first-child{color:rgba(255,255,255,.5)}.page.dark .info-row span:last-child{color:var(--star-bright);font-weight:500}
+  .page.light .info-row span:first-child{color:var(--text-muted)}.page.light .info-row span:last-child{color:var(--night);font-weight:500}
+  .text-block p{font-size:14px;line-height:1.8;margin-bottom:12px;text-indent:2em}
+  .page.dark .text-block p{color:rgba(255,255,255,.75)}.page.light .text-block p{color:var(--text-muted)}
+  .quote-block{background:linear-gradient(135deg,rgba(255,217,107,.08),rgba(232,116,97,.05));border-left:3px solid var(--star);padding:14px 18px;border-radius:8px;margin:14px 0;font-style:italic;font-size:13px}
+  .page.dark .quote-block{color:rgba(255,255,255,.8)}.page.light .quote-block{color:var(--text)}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.tags span{background:linear-gradient(135deg,rgba(255,217,107,.1),rgba(232,116,97,.08));padding:5px 14px;border-radius:18px;font-size:12px;border:1px solid rgba(255,217,107,.2)}
+  .page.dark .tags span{color:var(--star-bright)}.page.light .tags span{color:var(--night)}
+  .vol-card{border-radius:16px;padding:28px 26px;position:relative}
+  .vol-date{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .page.dark .vol-date{color:var(--star-bright)}.page.light .vol-date{color:var(--rose)}
+  .vol-date::before{content:"";width:18px;height:2px;background:currentColor;border-radius:1px}
+  .vol-card h4{font-size:19px;margin-bottom:12px;font-weight:600}
+  .page.dark .vol-card h4{color:#fff}.page.light .vol-card h4{color:var(--night)}
+  .vol-card p{font-size:14px;line-height:1.75;margin-bottom:10px}
+  .page.dark .vol-card p{color:rgba(255,255,255,.7)}.page.light .vol-card p{color:var(--text-muted)}
+  .vol-insight{border-left:3px solid var(--rose);padding:12px 16px;border-radius:8px;margin-top:12px;font-size:13px;font-style:italic;background:linear-gradient(135deg,rgba(232,116,97,.06),rgba(255,217,107,.06))}
+  .vol-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.vol-meta span{background:rgba(255,217,107,.12);color:#8a6d00;padding:3px 10px;border-radius:10px;font-size:11px}
+  .page.dark .vol-meta span{background:rgba(255,217,107,.15);color:var(--star-bright)}
+  .img-gallery{display:grid;gap:12px;margin:14px 0}
+  .img-gallery.cols-2{grid-template-columns:1fr 1fr}
+  .img-gallery.cols-3{grid-template-columns:1fr 1fr 1fr}
+  .img-frame{border-radius:12px;overflow:hidden;border:2px solid rgba(255,217,107,.2);box-shadow:0 4px 16px rgba(0,0,0,.08);position:relative}
+  .img-frame img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:4/3}
+  .img-frame .caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:11px;padding:16px 10px 6px;text-align:center}
+  .img-hero{border-radius:12px;overflow:hidden;border:2px solid rgba(255,217,107,.25);box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:14px;position:relative}
+  .img-hero img{width:100%;max-height:260px;object-fit:cover;display:block}
+  .img-hero .caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;padding:20px 14px 8px}
+  .img-banner{border-radius:12px;overflow:hidden;border:2px solid rgba(255,217,107,.25);box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:12px;position:relative}
+  .img-banner img{width:100%;max-height:180px;object-fit:cover;display:block}
+  .img-banner .caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;padding:16px 14px 6px}
+  .cert-frame{border-radius:12px;overflow:hidden;border:2px solid rgba(212,160,23,.3);box-shadow:0 4px 16px rgba(0,0,0,.08);max-width:320px;margin:12px auto 0}.cert-frame img{width:100%;display:block}
+  .club-list{list-style:none}
+  .club-list li{padding:13px 0;border-bottom:1px dashed rgba(255,217,107,.15);display:flex;gap:14px;align-items:flex-start}.club-list li:last-child{border-bottom:none}
+  .bullet-star{width:16px;height:16px;flex-shrink:0;margin-top:3px}.bullet-star svg{width:100%;height:100%}
+  .club-list .content strong{font-size:14px;display:block;margin-bottom:3px}
+  .page.dark .club-list .content strong{color:#fff}.page.light .club-list .content strong{color:var(--night)}
+  .club-list .content span{font-size:13px;line-height:1.7}
+  .club-block-title{font-size:18px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .page.dark .club-block-title{color:#fff}.page.light .club-block-title{color:var(--night)}
+  .club-block-title .icon-circle{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--star),#e6b800);display:flex;align-items:center;justify-content:center;flex-shrink:0}.club-block-title .icon-circle svg{width:16px;height:16px}
+  .future-banner{border-radius:20px;padding:26px 24px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--night),var(--night-light) 60%,var(--rose) 130%);color:#fff}
+  .future-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,217,107,.15),transparent 50%)}
+  .future-banner .label{font-size:12px;letter-spacing:3px;color:var(--star-bright);margin-bottom:8px;position:relative;z-index:2}
+  .future-banner h2{font-size:22px;font-weight:700;position:relative;z-index:2;line-height:1.5}
+  .future-banner .sub{color:rgba(255,255,255,.75);font-size:13px;position:relative;z-index:2;font-style:italic;margin-top:6px}
+  .future-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:680px){.future-grid{grid-template-columns:1fr}}
+  .future-card{border-radius:14px;padding:20px;position:relative;overflow:hidden;border-top:3px solid var(--star);transition:all .3s}
+  .page.dark .future-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,217,107,.15)}
+  .page.light .future-card{background:var(--card);box-shadow:var(--shadow);border:1px solid rgba(255,217,107,.12)}
+  .future-card .num{position:absolute;top:12px;right:16px;font-size:32px;font-weight:700;color:rgba(255,217,107,.1);line-height:1}
+  .future-card .icon-box{width:36px;height:36px;margin-bottom:10px}.future-card .icon-box svg{width:100%;height:100%}
+  .future-card h4{font-size:14px;margin-bottom:6px;font-weight:600}
+  .page.dark .future-card h4{color:#fff}.page.light .future-card h4{color:var(--night)}
+  .future-card p{font-size:12px;line-height:1.6}
+  .page.dark .future-card p{color:rgba(255,255,255,.65)}.page.light .future-card p{color:var(--text-muted)}
+  .pledge{border-radius:16px;padding:26px 24px;text-align:center;border:1px dashed rgba(255,217,107,.3);position:relative;background:linear-gradient(135deg,rgba(255,217,107,.06),rgba(232,116,97,.04))}
+  .pledge .star-deco{position:absolute;top:-13px;left:50%;transform:translateX(-50%);width:24px;height:24px}.pledge .star-deco svg{width:100%;height:100%;filter:drop-shadow(0 0 10px var(--star))}
+  .pledge p{font-size:14px;font-style:italic;line-height:1.9}.pledge .sig{margin-top:12px;color:var(--rose);font-weight:600;font-size:13px}
+  .ending{text-align:center}
+  .ending .end-stars{color:var(--star);font-size:18px;letter-spacing:8px;margin-bottom:16px}
+  .ending h2{font-size:24px;color:#fff;margin-bottom:14px}
+  .ending .end-info{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px}
+  .ending .end-quote{font-style:italic;color:rgba(255,255,255,.4);font-size:13px;max-width:480px;margin:0 auto;line-height:1.8}
+  .floating-planet{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--planet),var(--planet-dark));box-shadow:inset -6px -6px 12px rgba(0,0,0,.15);opacity:.5}
+</style>
+</head>
+<body>
+<div class="starfield" id="starfield"></div>
+<div class="book" id="book">
+
+  <!-- P1: 封面 -->
+  <section class="page dark active" data-label="封面">
+    <div class="page-tag">小王子的星球竞选之旅 · <span class="num">01</span> / 15</div>
+    <div class="floating-planet" style="width:50px;height:50px;top:12%;left:8%;animation:float 8s ease-in-out infinite"></div>
+    <div class="floating-planet" style="width:30px;height:30px;top:20%;right:10%;animation:float 10s ease-in-out infinite reverse"></div>
+    <div class="cover">
+      <svg class="prince-planet" viewBox="0 0 200 200" fill="none">
+        <ellipse cx="100" cy="160" rx="55" ry="14" fill="#d4a574" opacity=".3"/><circle cx="100" cy="150" r="40" fill="#d4a574"/><circle cx="85" cy="140" r="6" fill="#b8865a" opacity=".5"/><circle cx="110" cy="160" r="8" fill="#b8865a" opacity=".4"/>
+        <rect x="92" y="95" width="16" height="30" rx="3" fill="#2c4373"/><path d="M88 100 Q100 106 112 100 L116 112 Q100 118 84 112 Z" fill="#e87461"/><path d="M112 100 L120 115 L116 118 L110 108 Z" fill="#e87461"/>
+        <circle cx="100" cy="85" r="14" fill="#f4d3a8"/><path d="M86 82 Q88 72 100 71 Q112 72 114 82 Q112 78 100 76 Q88 78 86 82 Z" fill="#5a3a1a"/><circle cx="95" cy="85" r="1.8" fill="#2c3e50"/><circle cx="105" cy="85" r="1.8" fill="#2c3e50"/><path d="M97 91 Q100 93 103 91" stroke="#2c3e50" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <rect x="93" y="123" width="5" height="18" rx="2" fill="#2c4373"/><rect x="102" y="123" width="5" height="18" rx="2" fill="#2c4373"/><ellipse cx="95" cy="142" rx="5" ry="2.5" fill="#1a2847"/><ellipse cx="105" cy="142" rx="5" ry="2.5" fill="#1a2847"/>
+        <g transform="translate(55,130)"><circle cx="0" cy="0" r="5" fill="#e87461"/><circle cx="-2" cy="-2" r="3" fill="#f4a896"/><circle cx="2" cy="1" r="3" fill="#d4604f"/><path d="M0 5 Q0 10 -1 12 M0 5 Q0 10 1 12" stroke="#6b8e4e" stroke-width="1.5" fill="none"/></g>
+        <g fill="#ffd96b"><circle cx="30" cy="40" r="2"/><circle cx="170" cy="50" r="1.5"/><circle cx="160" cy="25" r="2"/></g>
+      </svg>
+      <div class="cover-badge"><svg width="14" height="14" viewBox="0 0 14 14" fill="#ffd96b"><path d="M7 0 L8.5 5 L14 5.5 L9.5 9 L11 14 L7 11 L3 14 L4.5 9 L0 5.5 L5.5 5 Z"/></svg>2026年度竞选演讲</div>
+      <h1>方<span class="name">益</span>凡</h1>
+      <p class="cover-quote">"所有的大人最初都是孩子，但很少有人记得这一点。"</p>
+      <div class="cover-role">竞选四牌楼校区交流拓展中心主任</div>
+      <div class="cover-meta">
+        <div class="cover-meta-item"><span>年级</span><strong>2025级</strong></div>
+        <div class="cover-meta-item"><span>专业</span><strong>自动化</strong></div>
+        <div class="cover-meta-item"><span>校区</span><strong>四牌楼</strong></div>
+        <div class="cover-meta-item"><span>在社</span><strong>一年</strong></div>
+      </div>
+      <div class="cover-hint">→ 点击右侧星星或按 → 键翻页</div>
+    </div>
+  </section>
+
+  <!-- P2: 个人简介-基本信息 -->
+  <section class="page dark" data-label="个人简介">
+    <div class="page-tag">个人简介 · <span class="num">02</span> / 15</div>
+    <div class="page-content" style="text-align:center">
+      <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" fill="#d4a574"/><circle cx="24" cy="26" r="5" fill="#b8865a" opacity=".5"/><circle cx="38" cy="36" r="6" fill="#b8865a" opacity=".4"/><ellipse cx="32" cy="32" rx="30" ry="6" stroke="#ffd96b" stroke-width="1.5" fill="none" transform="rotate(-15 32 32)"/></svg></div>
+      <div class="section-stars">✦ ✦ ✦</div>
+      <h2 class="section-title">个人简介</h2><p class="section-desc">我的小小星球</p>
+      <div class="card-bg" style="max-width:560px;margin:0 auto">
+        <div class="info-grid">
+          <div class="avatar-card"><div class="photo-wrap photo-circle" style="width:130px;height:130px"><img src="photo.jpg" alt="方益凡"></div><h3>方益凡</h3><div class="role">交流拓展中心 · 干事</div></div>
+          <div class="info-list"><div class="info-row"><span>年级</span><span>2025级</span></div><div class="info-row"><span>专业</span><span>自动化</span></div><div class="info-row"><span>校区</span><span>四牌楼校区</span></div><div class="info-row"><span>在社部门</span><span>交流拓展中心</span></div><div class="info-row"><span>在社时间</span><span>一年</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P3: 个人简介-详细介绍 -->
+  <section class="page light" data-label="个人简介">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">个人简介 · <span class="num" style="color:var(--rose)">03</span> / 15</div>
+    <div class="page-content">
+      <h2 class="section-title" style="font-size:24px">关于我</h2><p class="section-desc">一年耕耘，一份初心</p>
+      <div class="card-bg text-block">
+        <p>大家好，我是<span class="highlight">方益凡</span>，2025级本科生，现就读于<span class="highlight">自动化</span>专业，在四牌楼校区学习生活。</p>
+        <p>大一期间，我在<span class="highlight">交流拓展中心</span>工作了一年。在田学姐和牛学姐等热心的学长学姐的悉心指导下，我参与了社内众多活动的支持工作——从前期筹备到现场执行，从物资管理到人员协调，每一段经历都让我对"服务"二字有了更深的理解。</p>
+        <div class="quote-block">"正因为你为你的玫瑰花费了时间，这才使你的玫瑰变得如此重要。"<br>——一年的付出，让唐社成为了我心中独一无二的玫瑰。</div>
+        <p>在社会实践活动中，我系统学习了<span class="highlight">公众号内容的撰写与排版</span>，掌握了图文策划、版面设计等技能。专业分流后，我来到四牌楼校区，希望将这份热情延续下去。</p>
+        <div class="tags"><span>📖 公众号运营</span><span>🎯 活动策划</span><span>🤝 团队协作</span><span>✍️ 文案撰写</span><span>📐 版面设计</span><span>💡 创新思维</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P4: 志愿经历-安徽招生 -->
+  <section class="page light" data-label="志愿经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">志愿经历 · <span class="num" style="color:var(--rose)">04</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="14" cy="14" r="5" fill="#ffd96b"/><circle cx="50" cy="18" r="4" fill="#ffd96b" opacity=".8"/><path d="M14 19 Q30 35 48 48" stroke="#e87461" stroke-width="2" fill="none" stroke-dasharray="3 3"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">志愿经历</h2><p class="section-desc">星际旅途中的第一颗星</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center">
+        <div class="card-bg vol-card">
+          <div class="vol-date">2025年9月 · 聘期一年</div><h4>安徽招生宣传学生大使</h4>
+          <p>经东南大学本科招生办公室正式聘任，我负责向家乡的学弟学妹介绍学校概况、专业特色与校园生活。通过线上线下相结合的方式，耐心解答考生疑问，分享真实的大学生活体验，帮助数十名考生做出更合适的选择。</p>
+          <div class="vol-insight">"语言是误会的源头，但真诚是消除距离的桥梁。"——这段经历让我学会了如何用真诚打动人心，也让我体会到"传承"的意义。</div>
+          <div class="vol-meta"><span>📢 宣传推广</span><span>🎓 招生咨询</span><span>🤝 校友联络</span></div>
+        </div>
+        <div class="cert-frame" style="max-width:100%;margin:0">
+          <img src="pinshu.jpg" alt="安徽招生宣传学生大使聘书">
+          <div style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:8px;font-style:italic">东南大学本科招生办公室 · 2025年9月26日</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P5: 志愿经历-烧伤营（演讲照片+故事） -->
+  <section class="page light" data-label="志愿经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">志愿经历 · <span class="num" style="color:var(--rose)">05</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="48" cy="48" r="6" fill="#ffd96b" opacity=".6"/><circle cx="18" cy="50" r="3.5" fill="#ffd96b" opacity=".7"/><path d="M50 42 Q40 30 48 18" stroke="#e87461" stroke-width="2" fill="none" stroke-dasharray="3 3" opacity=".6"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">志愿经历</h2><p class="section-desc">星际旅途中的第二颗星</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+        <div class="card-bg vol-card">
+          <div class="vol-date">2026年 · 暑期</div><h4>无疆童行烧伤营</h4>
+          <p>暑假期间，我参与了爱无疆社区组织的"无疆童行烧伤营"志愿服务活动，走近烧伤儿童及其家庭。</p>
+          <p>在营期里，我将自己的成长经历与感悟分享给小朋友和家长们，用陪伴和鼓励帮助他们走出阴霾、重拾信心。</p>
+          <div class="vol-insight">"真正重要的东西，用眼睛是看不见的，只有用心才能看清。"</div>
+        </div>
+        <div class="img-hero"><img src="aiwujiang4.jpg" alt="方益凡在烧伤营演讲"><div class="caption">方益凡在无疆童行烧伤营分享经历</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P6: 志愿经历-烧伤营续（大合影+陪伴+证书） -->
+  <section class="page light" data-label="志愿经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">志愿经历 · <span class="num" style="color:var(--rose)">06</span> / 15</div>
+    <div class="page-content">
+      <h2 class="section-title" style="font-size:22px;text-align:center">爱与陪伴的治愈之旅</h2><p class="section-desc">那些微笑，是最好的勋章</p>
+      <div class="img-banner"><img src="aiwujiang1.jpg" alt="爱无疆志愿服务大合影"><div class="caption">爱无疆社区康复服务行 · 全体志愿者合影</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:start">
+        <div class="img-frame"><img src="aiwujiang3.jpg" alt="陪伴小朋友"><div class="caption">陪伴小朋友学习与成长</div></div>
+        <div class="img-frame"><img src="aiwujiang2.jpg" alt="营期合影"><div class="caption">无疆童行烧伤营志愿者合影</div></div>
+        <div class="cert-frame" style="width:150px"><img src="aiwujiang5.jpg" alt="志愿者证书"></div>
+      </div>
+      <div class="card-bg" style="margin-top:12px;padding:16px 20px">
+        <p style="font-size:13px;line-height:1.7;color:var(--text-muted)">看着孩子们从沉默到微笑、从退缩到主动拥抱，我第一次真切感受到：<span class="highlight">爱与陪伴，是治愈创伤最好的良药。</span>这段志愿服务让我对唐社"服务社会、奉献爱心"的宗旨有了更切身的体悟。</p>
+        <div class="vol-meta" style="margin-top:8px"><span>❤️ 心理陪伴</span><span>🎤 经验分享</span><span>👨‍👩‍👧 家庭关怀</span><span>🏆 优秀志愿者</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P7: 志愿经历-大报恩寺（精简版） -->
+  <section class="page light" data-label="志愿经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">志愿经历 · <span class="num" style="color:var(--rose)">07</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><path d="M32 6 L20 20 L44 20 Z" fill="#d4a574"/><rect x="20" y="20" width="24" height="4" fill="#b8865a"/><rect x="22" y="24" width="20" height="4" fill="#d4a574"/><rect x="24" y="28" width="16" height="4" fill="#b8865a"/><rect x="26" y="32" width="12" height="4" fill="#d4a574"/><rect x="28" y="36" width="8" height="22" fill="#b8865a"/><circle cx="32" cy="10" r="2" fill="#ffd96b"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">志愿经历</h2><p class="section-desc">星际旅途中的第三颗星</p>
+      </div>
+      <div class="img-banner"><img src="dabaoen1.jpg" alt="大报恩寺遗址博物馆琉璃塔"><div class="caption">南京大报恩寺遗址博物馆 · 琉璃塔遗址</div></div>
+      <div class="img-gallery cols-2">
+        <div class="img-frame"><img src="dabaoen2.jpg" alt="志愿工作场景"><div class="caption">协助整理与包装文创物资</div></div>
+        <div class="img-frame"><img src="dabaoen3.jpg" alt="荣誉墙"><div class="caption">参观学习 · 机构荣誉与传承</div></div>
+      </div>
+      <div class="card-bg" style="margin-top:10px;padding:14px 20px">
+        <p style="font-size:13px;line-height:1.7;color:var(--text-muted)">在大报恩寺遗址博物馆担任志愿讲解员，为游客讲述千年古寺的传奇历史，并协助文创物资整理工作。<span class="highlight">文化的传承，正是我们守护的玫瑰。</span></p>
+        <div class="vol-meta" style="margin-top:8px"><span>🏛️ 文化讲解</span><span>📦 物资协助</span><span>📚 历史传承</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P8: 志愿经历-迎新志愿者活动 -->
+  <section class="page light" data-label="志愿经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">志愿经历 · <span class="num" style="color:var(--rose)">08</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="22" r="10" fill="#e87461"/><circle cx="28" cy="20" r="5" fill="#f4a896"/><path d="M22 32 Q32 36 42 32 L44 50 L20 50 Z" fill="#d4a574"/><path d="M32 36 L32 50" stroke="#b8865a" stroke-width="1.5"/><circle cx="50" cy="40" r="5" fill="#ffd96b" opacity=".7"/><circle cx="14" cy="44" r="4" fill="#ffd96b" opacity=".6"/><path d="M50 35 Q52 30 50 25" stroke="#6b8e4e" stroke-width="1.5" fill="none"/><path d="M14 39 Q12 34 14 29" stroke="#6b8e4e" stroke-width="1.5" fill="none"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">志愿经历</h2><p class="section-desc">星际旅途中的第四颗星</p>
+      </div>
+      <div class="card-bg vol-card">
+        <div class="vol-date">2025年 · 秋季</div><h4>迎新志愿者</h4>
+        <p>新学期伊始，我主动报名参加了学校的迎新志愿活动，协助新生完成报到注册、行李搬运和校园引导等工作。</p>
+        <p>从校门口到宿舍楼，从注册点到食堂，我穿梭在人群中，为初来乍到的学弟学妹们答疑解惑，帮助他们尽快熟悉校园环境、适应大学生活。</p>
+        <p>看到新生们从最初的紧张不安到露出安心的笑容，我仿佛看到了一年前的自己——那个同样迷茫、同样被学长学姐温暖过的自己。如今，这份温暖的接力棒传到了我的手中。</p>
+        <div class="vol-insight">"你为你的玫瑰所花费的时间，使你的玫瑰变得如此重要。"——一年前我被温暖，如今我温暖他人，这便是"传承"最美的模样。</div>
+        <div class="vol-meta"><span>🎒 迎新报到</span><span>🧳 行李搬运</span><span>🗺️ 校园引导</span><span>❤️ 温暖传承</span></div>
+      </div>
+      <div style="text-align:center;margin-top:14px">
+        <svg width="120" height="50" viewBox="0 0 120 50" fill="none">
+          <circle cx="20" cy="25" r="8" fill="#d4a574" opacity=".5"/><circle cx="40" cy="15" r="5" fill="#ffd96b" opacity=".6"/><circle cx="60" cy="25" r="10" fill="#d4a574" opacity=".4"/><circle cx="80" cy="15" r="5" fill="#ffd96b" opacity=".6"/><circle cx="100" cy="25" r="8" fill="#d4a574" opacity=".5"/>
+          <path d="M20 33 Q30 40 40 33" stroke="#e87461" stroke-width="1.5" fill="none" stroke-dasharray="2 2"/><path d="M60 35 Q70 42 80 35" stroke="#e87461" stroke-width="1.5" fill="none" stroke-dasharray="2 2"/><path d="M100 33 Q105 38 110 33" stroke="#e87461" stroke-width="1.5" fill="none" stroke-dasharray="2 2"/>
+        </svg>
+        <p style="font-size:12px;color:var(--text-muted);font-style:italic;margin-top:6px">— 星际旅途中的每一站，都是成长 —</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- P9: 社团经历-干事工作 -->
+  <section class="page dark" data-label="社团经历">
+    <div class="page-tag">社团经历 · <span class="num">09</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="40" rx="14" ry="12" fill="#e8945a"/><path d="M20 36 L14 24 L24 32 Z" fill="#e8945a"/><path d="M44 36 L50 24 L40 32 Z" fill="#e8945a"/><circle cx="26" cy="38" r="2" fill="#2c3e50"/><circle cx="38" cy="38" r="2" fill="#2c3e50"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">社团经历</h2><p class="section-desc">与狐狸驯养的日子</p>
+      </div>
+      <div class="card-bg">
+        <div class="club-block-title"><span class="icon-circle"><svg viewBox="0 0 20 20" fill="#1a2847"><circle cx="10" cy="10" r="3"/><circle cx="4" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/></svg></span>交流拓展中心 · 干事工作</div>
+        <ul class="club-list">
+          <li><div class="bullet-star"><svg viewBox="0 0 18 18" fill="#ffd96b"><path d="M9 0 L11 6.5 L18 7 L12.5 11 L14 18 L9 14 L4 18 L5.5 11 L0 7 L7 6.5 Z"/></svg></div><div class="content"><strong>社内活动支持</strong><span style="color:rgba(255,255,255,.65)">在田学姐、牛学姐等学长学姐指导下，参与完成多项社内活动的支持工作，涵盖活动筹备、现场协调、物资管理与收尾复盘等环节。</span></div></li>
+          <li><div class="bullet-star"><svg viewBox="0 0 18 18" fill="#ffd96b"><path d="M9 0 L11 6.5 L18 7 L12.5 11 L14 18 L9 14 L4 18 L5.5 11 L0 7 L7 6.5 Z"/></svg></div><div class="content"><strong>公众号运营实践</strong><span style="color:rgba(255,255,255,.65)">系统学习公众号内容撰写与排版设计，能够独立完成推文策划、文案撰写与版面美化，为部门宣传工作提供了有力支撑。</span></div></li>
+          <li><div class="bullet-star"><svg viewBox="0 0 18 18" fill="#ffd96b"><path d="M9 0 L11 6.5 L18 7 L12.5 11 L14 18 L9 14 L4 18 L5.5 11 L0 7 L7 6.5 Z"/></svg></div><div class="content"><strong>部门例会参与</strong><span style="color:rgba(255,255,255,.65)">认真参与每一次部门例会，从中收获颇多——了解了部门运转节奏与工作规范，锻炼了表达、倾听与协作能力。</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- P10: 社团经历-思考成长 -->
+  <section class="page dark" data-label="社团经历">
+    <div class="page-tag">社团经历 · <span class="num">10</span> / 15</div>
+    <div class="page-content">
+      <h2 class="section-title" style="font-size:24px;text-align:center">我的思考与成长</h2><p class="section-desc">从驯养到被驯养</p>
+      <div class="card-bg">
+        <ul class="club-list">
+          <li><div class="bullet-star"><svg viewBox="0 0 18 18" fill="#e87461"><path d="M9 0 L11 6.5 L18 7 L12.5 11 L14 18 L9 14 L4 18 L5.5 11 L0 7 L7 6.5 Z"/></svg></div><div class="content"><strong>从"执行者"到"策划者"的跃迁</strong><span style="color:rgba(255,255,255,.65)">一年的干事经历让我熟悉了活动落地流程，但我并不满足于此。我希望从执行走向策划，从"把事情做好"走向"把对的事情做出来"。</span></div></li>
+          <li><div class="bullet-star"><svg viewBox="0 0 18 18" fill="#e87461"><path d="M9 0 L11 6.5 L18 7 L12.5 11 L14 18 L9 14 L4 18 L5.5 11 L0 7 L7 6.5 Z"/></svg></div><div class="content"><strong>对四牌楼校区的观察与期待</strong><span style="color:rgba(255,255,255,.65)">来到四牌楼校区后，我深切感受到这里独特的氛围。我希望能为唐社在四牌楼的发展注入更多活力，让每一位社员都能找到归属感与参与感。</span></div></li>
+          <li><div class="bullet-star"><svg viewBox="0 0 18 18" fill="#e87461"><path d="M9 0 L11 6.5 L18 7 L12.5 11 L14 18 L9 14 L4 18 L5.5 11 L0 7 L7 6.5 Z"/></svg></div><div class="content"><strong>愿做"发光发热"的那个人</strong><span style="color:rgba(255,255,255,.65)">唐社给了我成长的舞台，如今我希望接过学长学姐的接力棒，成为能为部门、为社员发光发热的人，把这份温暖继续传递下去。</span></div></li>
+        </ul>
+        <div style="margin-top:18px;padding:14px 18px;border-left:3px solid var(--fox);border-radius:8px;background:linear-gradient(135deg,rgba(255,217,107,.08),rgba(232,148,90,.06));font-style:italic;font-size:13px;text-align:center;line-height:1.8;color:rgba(255,255,255,.8)">"正因为你驯养了我，我们彼此才不可或缺。<br>在唐社的每一天，都是一次彼此驯养、彼此成就的旅程。"</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P11: 社团经历-秋季招新面试官 -->
+  <section class="page light" data-label="社团经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">社团经历 · <span class="num" style="color:var(--rose)">11</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="20" cy="24" r="8" fill="#d4a574"/><circle cx="44" cy="24" r="8" fill="#d4a574"/><path d="M12 40 Q32 48 52 40 L52 52 L12 52 Z" fill="#e87461"/><path d="M28 16 Q32 12 36 16" stroke="#ffd96b" stroke-width="2" fill="none"/><circle cx="32" cy="10" r="3" fill="#ffd96b"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">社团经历</h2><p class="section-desc">秋季招新 · 寻找同路人</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+        <div class="img-frame" style="aspect-ratio:4/3"><img src="club1.jpg" alt="招新面试现场"><div class="caption">秋季招新面试现场 · 与新生交流</div></div>
+        <div class="card-bg vol-card" style="padding:22px 20px">
+          <div class="vol-date">2025年 · 秋季</div><h4>秋季招新面试官</h4>
+          <p>作为交流拓展中心的干事，我担任了秋季招新面试官，参与面试流程的设计与执行。</p>
+          <p>在与新生面对面交流的过程中，我不仅考察他们的能力与热情，更努力感受他们对公益与服务的初心。</p>
+          <div class="vol-insight">"你应该永远对自己驯养的东西负责。"——选拔新社员，也是在为他们的成长负责。</div>
+          <div class="vol-meta"><span>📋 面试设计</span><span>👥 人才选拔</span><span>💬 沟通交流</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P12: 社团经历-例会与迎新年活动 -->
+  <section class="page light" data-label="社团经历">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">社团经历 · <span class="num" style="color:var(--rose)">12</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="16" cy="16" r="6" fill="#d4a574"/><circle cx="32" cy="12" r="6" fill="#d4a574"/><circle cx="48" cy="16" r="6" fill="#d4a574"/><path d="M16 22 Q16 40 28 48 M48 22 Q48 40 36 48 M32 18 Q32 40 32 48" stroke="#e87461" stroke-width="2" fill="none"/><circle cx="32" cy="52" r="4" fill="#ffd96b"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">社团经历</h2><p class="section-desc">例会与迎新年 · 星球上的聚会</p>
+      </div>
+      <div class="img-gallery cols-3">
+        <div class="img-frame"><img src="club2.png" alt="部门例会合影"><div class="caption">部门例会 · 全员合影</div></div>
+        <div class="img-frame"><img src="club3.png" alt="例会后合影"><div class="caption">例会结束后 · 欢乐合影</div></div>
+        <div class="img-frame"><img src="club4.png" alt="迎新年礼物交换"><div class="caption">迎新年 · "欢聚"礼物交换</div></div>
+      </div>
+      <div class="card-bg" style="margin-top:12px;padding:16px 20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <div>
+            <div class="vol-date" style="margin-bottom:6px">部门例会</div>
+            <p style="font-size:13px;line-height:1.7;color:var(--text-muted)">每次例会都是一次思想的碰撞——总结工作、分享心得、规划未来；会后的嬉笑合影，更拉近了彼此的距离。在这里，我学会了倾听与表达，也收获了珍贵的友谊。</p>
+          </div>
+          <div>
+            <div class="vol-date" style="margin-bottom:6px">迎新年活动</div>
+            <p style="font-size:13px;line-height:1.7;color:var(--text-muted)">新年伊始，部门组织了礼物交换与欢聚活动。<span class="highlight">从例会到庆祝，唐社不仅是工作的地方，更是温暖的归属。</span></p>
+          </div>
+        </div>
+        <div class="vol-meta" style="margin-top:10px"><span>📋 例会参与</span><span>🎁 礼物交换</span><span>🎉 团建活动</span><span>❤️ 归属感</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P13: 未来展望-竞选目标+前三个 -->
+  <section class="page light" data-label="未来展望">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">未来展望 · <span class="num" style="color:var(--rose)">13</span> / 15</div>
+    <div class="page-content">
+      <div style="text-align:center">
+        <div class="section-icon-wrap"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="24" r="10" fill="#e87461"/><circle cx="28" cy="20" r="6" fill="#f4a896"/><path d="M32 34 Q32 42 30 50" stroke="#6b8e4e" stroke-width="2.5" fill="none"/><ellipse cx="26" cy="40" rx="6" ry="3" fill="#6b8e4e" transform="rotate(-30 26 40)"/></svg></div>
+        <div class="section-stars">✦ ✦ ✦</div><h2 class="section-title" style="font-size:26px">未来展望</h2><p class="section-desc">守护四牌楼的玫瑰花园</p>
+      </div>
+      <div class="future-banner"><div class="label">竞 选 目 标</div><h2>唐仲英爱心社 · 四牌楼校区交流拓展中心主任</h2><div class="sub">"如果你想要驯服一个人，就要冒着掉眼泪的风险。"——我愿冒这个险</div></div>
+      <div class="future-grid">
+        <div class="future-card"><div class="num">01</div><div class="icon-box"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="12" fill="#d4a574"/><ellipse cx="24" cy="24" rx="22" ry="5" stroke="#ffd96b" stroke-width="2" fill="none" transform="rotate(-15 24 24)"/></svg></div><h4>深耕活动策划</h4><p>推动部门从"支持型"向"策划型"升级，主导设计符合四牌楼校区气质的品牌活动。</p></div>
+        <div class="future-card"><div class="num">02</div><div class="icon-box"><svg viewBox="0 0 48 48" fill="none"><path d="M24 8 L30 18 L42 20 L33 28 L36 40 L24 34 L12 40 L15 28 L6 20 L18 18 Z" fill="#ffd96b"/></svg></div><h4>营造温暖氛围</h4><p>打造有温度、有归属感的社团文化，让每位社员感受到"唐社一家亲"。</p></div>
+        <div class="future-card"><div class="num">03</div><div class="icon-box"><svg viewBox="0 0 48 48" fill="none"><ellipse cx="24" cy="28" rx="12" ry="10" fill="#e8945a"/><path d="M16 26 L10 14 L20 22 Z" fill="#e8945a"/><path d="M32 26 L38 14 L28 22 Z" fill="#e8945a"/><circle cx="20" cy="26" r="1.5" fill="#2c3e50"/><circle cx="28" cy="26" r="1.5" fill="#2c3e50"/></svg></div><h4>增强参与归属感</h4><p>让干事从"被分配任务"转向"主动提出想法"，激发集体创造力。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P14: 未来展望-后三个+寄语 -->
+  <section class="page light" data-label="未来展望">
+    <div class="page-tag" style="color:rgba(44,62,80,.35)">未来展望 · <span class="num" style="color:var(--rose)">14</span> / 15</div>
+    <div class="page-content">
+      <h2 class="section-title" style="font-size:22px;text-align:center">展望续篇</h2><p class="section-desc">让星星继续发光</p>
+      <div class="future-grid">
+        <div class="future-card"><div class="num">04</div><div class="icon-box"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="10" width="28" height="22" rx="3" fill="#d4a574"/><rect x="12" y="12" width="24" height="18" rx="1" fill="#fef9e7"/><path d="M18 18 L18 24 M22 16 L22 24 M26 20 L26 24" stroke="#e87461" stroke-width="2" stroke-linecap="round"/></svg></div><h4>讲好唐社故事</h4><p>发挥公众号运营专长，建立常态化内容输出机制，让唐社的声音被更多人听见。</p></div>
+        <div class="future-card"><div class="num">05</div><div class="icon-box"><svg viewBox="0 0 48 48" fill="none"><circle cx="16" cy="24" r="8" fill="#d4a574"/><circle cx="32" cy="24" r="8" fill="#d4a574"/><ellipse cx="16" cy="24" rx="11" ry="3" stroke="#ffd96b" stroke-width="1.5" fill="none" transform="rotate(-15 16 24)"/><ellipse cx="32" cy="24" rx="11" ry="3" stroke="#ffd96b" stroke-width="1.5" fill="none" transform="rotate(15 32 24)"/></svg></div><h4>传承与发展并重</h4><p>继承学长学姐优秀经验，结合新校区特点大胆创新，让唐社精神焕发新生命力。</p></div>
+        <div class="future-card"><div class="num">06</div><div class="icon-box"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="20" r="8" fill="#e87461"/><circle cx="20" cy="16" r="5" fill="#f4a896"/><path d="M24 28 Q24 36 22 44" stroke="#6b8e4e" stroke-width="2.5" fill="none"/><ellipse cx="18" cy="34" rx="5" ry="2.5" fill="#6b8e4e" transform="rotate(-30 18 34)"/></svg></div><h4>服务社会奉献爱心</h4><p>组织更多有意义的志愿服务与公益活动，让爱心真正"无疆"。</p></div>
+      </div>
+      <div class="pledge" style="margin-top:18px">
+        <div class="star-deco"><svg viewBox="0 0 28 28" fill="#ffd96b"><path d="M14 0 L17 10 L28 10.5 L19 16 L21.5 28 L14 22 L6.5 28 L9 16 L0 10.5 L11 10 Z"/></svg></div>
+        <p>"一年前，我怀着忐忑走进交流拓展中心；<br>一年后，我怀着坚定站在这里，希望成为那个发光发热的人。<br>唐社给了我温暖，我愿以更大的担当，将这份温暖传递给更多人。"</p>
+        <div class="sig">—— 方益凡 · 敬上</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P15: 结尾 -->
+  <section class="page dark" data-label="感谢">
+    <div class="page-tag">尾声 · <span class="num">15</span> / 15</div>
+    <div class="floating-planet" style="width:40px;height:40px;top:15%;left:12%;animation:float 8s ease-in-out infinite"></div>
+    <div class="floating-planet" style="width:28px;height:28px;bottom:20%;right:14%;animation:float 10s ease-in-out infinite reverse"></div>
+    <div class="ending">
+      <div class="end-stars">✦ ✦ ✦</div>
+      <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style="margin:0 auto 14px">
+        <circle cx="35" cy="35" r="26" fill="#d4a574"/><ellipse cx="35" cy="35" rx="31" ry="6" stroke="#ffd96b" stroke-width="1.5" fill="none" transform="rotate(-15 35 35)"/>
+        <rect x="31" y="16" width="8" height="17" rx="2" fill="#2c4373"/><circle cx="35" cy="12" r="7" fill="#f4d3a8"/><path d="M29 13 Q31 6 35 5 Q39 6 41 13" fill="#5a3a1a"/><circle cx="32" cy="12" r="1" fill="#2c3e50"/><circle cx="38" cy="12" r="1" fill="#2c3e50"/><path d="M30 17 Q35 20 40 17 L38 22 Q35 23 32 22 Z" fill="#e87461"/>
+      </svg>
+      <h2>感谢您的聆听</h2>
+      <div class="end-info">方益凡 · 2025级 · 自动化专业 · 四牌楼校区<br>唐仲英爱心社交流拓展中心主任竞选 · 2026</div>
+      <div class="end-quote">"当你夜晚仰望星空的时候，因为我住在其中一颗星星上，因为我会在那颗星星上微笑，你会觉得所有的星星都在笑。"</div>
+    </div>
+  </section>
+
+</div>
+<button class="nav-btn nav-prev" id="prevBtn" disabled><svg viewBox="0 0 20 20" fill="none"><path d="M12 4 L6 10 L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<button class="nav-btn nav-next" id="nextBtn"><svg viewBox="0 0 20 20" fill="none"><path d="M8 4 L14 10 L8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<div class="pager" id="pager"><span class="pager-label"><span class="cur" id="curPage">1</span> / <span id="totalPage">15</span></span></div>
+<script>
+  const sf=document.getElementById('starfield');
+  for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2+1;s.style.width=sz+'px';s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(Math.random()*2+2)+'s';sf.appendChild(s)}
+  const pages=document.querySelectorAll('.page');const total=pages.length;let cur=0;document.getElementById('totalPage').textContent=total;
+  const prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn'),curEl=document.getElementById('curPage');
+  const pager=document.getElementById('pager');const dotsC=document.createElement('div');dotsC.style.cssText='display:flex;align-items:center;gap:8px';
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='pager-dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dotsC.appendChild(d)}
+  pager.insertBefore(dotsC,pager.firstChild);const dots=document.querySelectorAll('.pager-dot');
+  function update(){pages.forEach((p,i)=>{p.classList.remove('active','prev');if(i===cur)p.classList.add('active');else if(i<cur)p.classList.add('prev')});dots.forEach((d,i)=>d.classList.toggle('active',i===cur));curEl.textContent=cur+1;prevBtn.disabled=cur===0;nextBtn.disabled=cur===total-1;nextBtn.style.opacity=cur===total-1?'0':'1'}
+  function goTo(i){if(i<0||i>=total||i===cur)return;cur=i;update()}
+  function next(){goTo(cur+1)}function prev(){goTo(cur-1)}
+  prevBtn.onclick=prev;nextBtn.onclick=next;
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ')next();if(e.key==='ArrowLeft'||e.key==='ArrowUp')prev()});
+  let wl=false;window.addEventListener('wheel',e=>{if(wl)return;wl=true;setTimeout(()=>wl=false,700);if(e.deltaY>0||e.deltaX>0)next();else prev()},{passive:true});
+  let tsx=0;window.addEventListener('touchstart',e=>{tsx=e.touches[0].clientX});window.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tsx;if(Math.abs(dx)>50){dx<0?next():prev()}});
+</script>
+</body>
+</html>
